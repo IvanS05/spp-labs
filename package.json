@@ -1,0 +1,21 @@
+{
+  "name": "spp-labs",
+  "version": "1.0.0",
+  "private": true,
+  "description": "СПП: сквозной проект «Менеджер задач» (лабораторные работы 1-5)",
+  "type": "module",
+  "workspaces": [
+    "packages/*",
+    "lab1"
+  ],
+  "scripts": {
+    "start": "npm start --workspace @spp/lab1",
+    "dev": "npm run dev --workspace @spp/lab1",
+    "lab1": "npm run dev --workspace @spp/lab1",
+    "test": "npm test --workspace @spp/lab1",
+    "seed": "npm run seed --workspace @spp/lab1"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

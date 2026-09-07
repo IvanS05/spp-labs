@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title><%= typeof title !== 'undefined' && title ? title + ' · ' + appName : appName %></title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=JetBrains+Mono:wght@400;600&display=swap">
+  <link rel="stylesheet" href="/static/css/app.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><text y='26' font-size='26'>&#127925;</text></svg>">
+</head>
+<body>
+  <div class="aurora" aria-hidden="true"><span></span><span></span><span></span></div>
+
+  <header class="topbar">
+    <a class="brand" href="/tasks">
+      <span class="brand__mark" aria-hidden="true"></span>
+      <span class="brand__text">
+        <strong><%= appName %></strong>
+      </span>
+    </a>
+    <nav class="topnav">
+      <a class="topnav__link<%= currentPath === '/tasks' ? ' is-active' : '' %>" href="/tasks">Все задачи</a>
+      <a class="topnav__link<%= currentPath === '/tasks/new' ? ' is-active' : '' %>" href="/tasks/new">Новая задача</a>
+    </nav>
+  </header>
+
+  <main class="page">

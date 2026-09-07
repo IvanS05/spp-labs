@@ -1,0 +1,63 @@
+<%
+  const overdue = isOverdue(task);
+  const soon = isDueSoon(task);
+  const days = daysUntilDue(task.dueDate);
+  const done = task.status === STATUSES.DONE;
+%>
+<article class="card card--<%= statusTone(task.status) %><%= done ? ' is-done' : '' %><%= overdue ? ' is-overdue' : '' %>">
+  <div class="card__head">
+    <form class="card__toggle" action="/tasks/<%= task.id %>/toggle" method="post">
+      <input type="hidden" name="returnTo" value="<%= returnTo %>">
+      <button type="submit" class="checkbox<%= done ? ' is-checked' : '' %>"
+              title="<%= done ? 'Вернуть в работу' : 'Отметить выполненной' %>"
+              aria-label="<%= done ? 'Вернуть в работу' : 'Отметить выполненной' %>"></button>
+    </form>
+
+    <div class="card__title">
+      <a href="/tasks/<%= task.id %>?returnTo=<%= encodeURIComponent(returnTo) %>"><%= task.title %></a>
+      <div class="card__badges">
+        <span class="badge badge--<%= statusTone(task.status) %>"><%= statusLabel(task.status) %></span>
+        <span class="badge badge--priority-<%= task.priority %>"><%= priorityLabel(task.priority) %></span>
+        <% if (task.attachments.length) { %>
+          <span class="badge badge--ghost"><%= task.attachments.length %>
+            <%= pluralize(task.attachments.length, ['файл', 'файла', 'файлов']) %></span>
+        <% } %>
+      </div>
+    </div>
+
+    <div class="card__due">
+      <% if (task.dueDate) { %>
+        <span class="due<%= overdue ? ' due--overdue' : soon ? ' due--soon' : '' %>">
+          <span class="due__date"><%= formatDate(task.dueDate) %></span>
+          <span class="due__rel"><%= done ? 'срок закрыт' : formatRelativeDays(days) %></span>
+        </span>
+      <% } else { %>
+        <span class="due due--none">без срока</span>
+      <% } %>
+    </div>
+  </div>
+
+  <% if (task.description) { %>
+    <p class="card__text"><%= task.description %></p>
+  <% } %>
+
+  <div class="card__actions">
+    <form class="statusgroup" action="/tasks/<%= task.id %>/status" method="post">
+      <input type="hidden" name="returnTo" value="<%= returnTo %>">
+      <% STATUS_LIST.forEach((option) => { %>
+        <button type="submit" name="status" value="<%= option.value %>"
+                class="chip chip--<%= option.tone %><%= task.status === option.value ? ' is-current' : '' %>"
+                <%= task.status === option.value ? 'disabled' : '' %>><%= option.label %></button>
+      <% }) %>
+    </form>
+
+    <div class="card__links">
+      <a class="link" href="/tasks/<%= task.id %>/edit?returnTo=<%= encodeURIComponent(returnTo) %>">Изменить</a>
+      <form action="/tasks/<%= task.id %>/delete" method="post"
+            onsubmit="return confirm('Удалить задачу и все прикреплённые к ней файлы?')">
+        <input type="hidden" name="returnTo" value="<%= returnTo %>">
+        <button type="submit" class="link link--danger">Удалить</button>
+      </form>
+    </div>
+  </div>
+</article>

@@ -1,0 +1,79 @@
+<%- include('../partials/head') %>
+
+<section class="toolbar">
+  <nav class="tabs" aria-label="Фильтр по статусу">
+    <%
+      const tabs = [
+        { value: 'all', label: 'Все', count: stats.all, tone: 'neutral' },
+        ...STATUS_LIST.map((s) => ({ value: s.value, label: s.label, count: stats[s.value], tone: s.tone })),
+        { value: 'overdue', label: 'Просроченные', count: stats.overdue, tone: 'magenta' },
+      ];
+      const tabQuery = (value) => {
+        const params = new URLSearchParams();
+        if (value !== 'all') params.set('status', value);
+        if (filter.search) params.set('search', filter.search);
+        if (filter.sort !== 'due') params.set('sort', filter.sort);
+        const q = params.toString();
+        return q ? '/tasks?' + q : '/tasks';
+      };
+    %>
+    <% tabs.forEach((tab) => { %>
+      <a class="tab tab--<%= tab.tone %><%= filter.status === tab.value ? ' is-active' : '' %>"
+         href="<%= tabQuery(tab.value) %>">
+        <%= tab.label %><span class="tab__count"><%= tab.count %></span>
+      </a>
+    <% }) %>
+  </nav>
+
+  <div class="toolbar__row">
+    <form class="filters" action="/tasks" method="get">
+      <input type="hidden" name="status" value="<%= filter.status %>">
+      <label class="field field--inline">
+        <span class="field__label">Поиск</span>
+        <input type="search" name="search" value="<%= filter.search %>" placeholder="название или описание">
+      </label>
+      <label class="field field--inline">
+        <span class="field__label">Сортировка</span>
+        <select name="sort">
+          <% SORT_LIST.forEach((option) => { %>
+            <option value="<%= option.value %>" <%= filter.sort === option.value ? 'selected' : '' %>><%= option.label %></option>
+          <% }) %>
+        </select>
+      </label>
+      <button type="submit" class="button button--ghost">Применить</button>
+      <% if (filter.search || filter.sort !== 'due') { %>
+        <a class="link" href="<%= filter.status === 'all' ? '/tasks' : '/tasks?status=' + filter.status %>">Сбросить</a>
+      <% } %>
+    </form>
+
+    <a class="button button--primary" href="/tasks/new?<%= new URLSearchParams({ status: filter.status, search: filter.search, sort: filter.sort }).toString() %>">
+      Добавить задачу
+    </a>
+  </div>
+</section>
+
+<section class="list">
+  <% if (tasks.length === 0) { %>
+    <div class="empty">
+      <p class="empty__title">Здесь пока пусто</p>
+      <p class="empty__text">
+        <% if (filter.search) { %>
+          По запросу «<%= filter.search %>» ничего не нашлось. Измените фильтр или создайте задачу.
+        <% } else { %>
+          Создайте первую задачу, задайте срок и прикрепите нужные файлы.
+        <% } %>
+      </p>
+      <a class="button button--primary" href="/tasks/new">Создать задачу</a>
+    </div>
+  <% } else { %>
+    <p class="list__summary">
+      Показано <%= tasks.length %> <%= pluralize(tasks.length, ['задача', 'задачи', 'задач']) %>
+      <% if (stats.dueSoon > 0) { %>· срок горит у <%= stats.dueSoon %><% } %>
+    </p>
+    <% tasks.forEach((task) => { %>
+      <%- include('../partials/task-card', { task, returnTo }) %>
+    <% }) %>
+  <% } %>
+</section>
+
+<%- include('../partials/foot') %>

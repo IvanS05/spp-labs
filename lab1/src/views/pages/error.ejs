@@ -1,0 +1,10 @@
+<%- include('../partials/head') %>
+
+<section class="errorpage">
+  <p class="errorpage__code"><%= status %></p>
+  <h1 class="errorpage__title"><%= title %></h1>
+  <p class="errorpage__text"><%= message %></p>
+  <a class="button button--primary" href="/tasks">Вернуться к задачам</a>
+</section>
+
+<%- include('../partials/foot') %>

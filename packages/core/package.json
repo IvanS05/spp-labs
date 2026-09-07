@@ -1,0 +1,11 @@
+{
+  "name": "@spp/core",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Доменное ядро проекта: модель задачи, валидация, хранилище. Общее для всех лабораторных.",
+  "type": "module",
+  "main": "src/index.js",
+  "exports": {
+    ".": "./src/index.js"
+  }
+}

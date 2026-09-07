@@ -1,0 +1,12 @@
+node_modules/
+data/uploads/*
+!data/uploads/.gitkeep
+data/tasks.json
+.env
+*.log
+.DS_Store
+
+# Отчёты и временные файлы Word — не относятся к коду проекта
+*.docx
+~$*
+*.tmp

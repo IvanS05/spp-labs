@@ -1,0 +1,84 @@
+<%- include('../partials/head') %>
+<%
+  const isEdit = mode === 'edit';
+  const action = isEdit ? '/tasks/' + task.id : '/tasks';
+  const hasErrors = Object.keys(errors).length > 0;
+%>
+
+<section class="pagehead">
+  <a class="back" href="<%= returnTo %>">← Назад</a>
+  <h1 class="pagehead__title"><%= isEdit ? 'Редактирование задачи' : 'Новая задача' %></h1>
+</section>
+
+<% if (hasErrors) { %>
+  <p class="notice notice--error" role="alert">Проверьте выделенные поля — задача не сохранена.</p>
+<% } %>
+
+<form class="panel form" action="<%= action %>" method="post" enctype="multipart/form-data">
+  <input type="hidden" name="returnTo" value="<%= returnTo %>">
+
+  <label class="field<%= errors.title ? ' field--invalid' : '' %>">
+    <span class="field__label">Название <span class="field__req">обязательно</span></span>
+    <input type="text" name="title" maxlength="120" required
+           value="<%= task.title %>" placeholder="Например: сдать лабораторную по СПП" autofocus>
+    <% if (errors.title) { %><span class="field__error"><%= errors.title %></span><% } %>
+  </label>
+
+  <label class="field<%= errors.description ? ' field--invalid' : '' %>">
+    <span class="field__label">Описание</span>
+    <textarea name="description" rows="4" maxlength="2000"
+              placeholder="Что нужно сделать и на что обратить внимание"><%= task.description %></textarea>
+    <% if (errors.description) { %><span class="field__error"><%= errors.description %></span><% } %>
+  </label>
+
+  <div class="form__row">
+    <label class="field<%= errors.status ? ' field--invalid' : '' %>">
+      <span class="field__label">Статус</span>
+      <select name="status">
+        <% STATUS_LIST.forEach((option) => { %>
+          <option value="<%= option.value %>" <%= task.status === option.value ? 'selected' : '' %>><%= option.label %></option>
+        <% }) %>
+      </select>
+      <% if (errors.status) { %><span class="field__error"><%= errors.status %></span><% } %>
+    </label>
+
+    <label class="field<%= errors.priority ? ' field--invalid' : '' %>">
+      <span class="field__label">Приоритет</span>
+      <select name="priority">
+        <% PRIORITY_LIST.forEach((option) => { %>
+          <option value="<%= option.value %>" <%= task.priority === option.value ? 'selected' : '' %>><%= option.label %></option>
+        <% }) %>
+      </select>
+      <% if (errors.priority) { %><span class="field__error"><%= errors.priority %></span><% } %>
+    </label>
+
+    <label class="field<%= errors.dueDate ? ' field--invalid' : '' %>">
+      <span class="field__label">Ожидаемая дата завершения</span>
+      <input type="date" name="dueDate" value="<%= task.dueDate || '' %>">
+      <% if (errors.dueDate) { %><span class="field__error"><%= errors.dueDate %></span><% } %>
+    </label>
+  </div>
+
+  <label class="field field--file">
+    <span class="field__label">
+      Прикрепить файлы
+      <span class="field__hint">до 5 файлов, каждый не больше <%= formatBytes(10 * 1024 * 1024) %></span>
+    </span>
+    <input type="file" name="attachments" multiple>
+  </label>
+
+  <% if (isEdit && task.attachments && task.attachments.length) { %>
+    <p class="form__note">
+      Уже прикреплено <%= task.attachments.length %>
+      <%= pluralize(task.attachments.length, ['файл', 'файла', 'файлов']) %>.
+      Управлять ими можно на странице задачи.
+    </p>
+  <% } %>
+
+  <div class="form__actions">
+    <button type="submit" class="button button--primary"><%= isEdit ? 'Сохранить' : 'Создать задачу' %></button>
+    <a class="button button--ghost" href="<%= returnTo %>">Отмена</a>
+  </div>
+</form>
+
+<%- include('../partials/foot') %>

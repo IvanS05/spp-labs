@@ -1,0 +1,103 @@
+<%- include('../partials/head') %>
+<%
+  const overdue = isOverdue(task);
+  const soon = isDueSoon(task);
+  const days = daysUntilDue(task.dueDate);
+%>
+
+<section class="pagehead">
+  <a class="back" href="<%= returnTo %>">← К списку</a>
+  <div class="pagehead__row">
+    <h1 class="pagehead__title"><%= task.title %></h1>
+    <div class="card__badges">
+      <span class="badge badge--<%= statusTone(task.status) %>"><%= statusLabel(task.status) %></span>
+      <span class="badge badge--priority-<%= task.priority %>"><%= priorityLabel(task.priority) %></span>
+      <% if (overdue) { %><span class="badge badge--magenta">просрочено</span><% } %>
+    </div>
+  </div>
+</section>
+
+<div class="detail">
+  <section class="panel">
+    <h2 class="panel__title">Описание</h2>
+    <% if (task.description) { %>
+      <p class="panel__text"><%= task.description %></p>
+    <% } else { %>
+      <p class="panel__text panel__text--muted">Описание не заполнено.</p>
+    <% } %>
+
+    <h2 class="panel__title">Сменить статус</h2>
+    <form class="statusgroup statusgroup--wide" action="/tasks/<%= task.id %>/status" method="post">
+      <input type="hidden" name="returnTo" value="/tasks/<%= task.id %>">
+      <% STATUS_LIST.forEach((option) => { %>
+        <button type="submit" name="status" value="<%= option.value %>"
+                class="chip chip--<%= option.tone %><%= task.status === option.value ? ' is-current' : '' %>"
+                <%= task.status === option.value ? 'disabled' : '' %>><%= option.label %></button>
+      <% }) %>
+    </form>
+
+    <div class="panel__actions">
+      <a class="button button--ghost" href="/tasks/<%= task.id %>/edit?returnTo=<%= encodeURIComponent(returnTo) %>">Редактировать</a>
+      <form action="/tasks/<%= task.id %>/delete" method="post"
+            onsubmit="return confirm('Удалить задачу и все прикреплённые к ней файлы?')">
+        <input type="hidden" name="returnTo" value="<%= returnTo %>">
+        <button type="submit" class="button button--danger">Удалить задачу</button>
+      </form>
+    </div>
+  </section>
+
+  <aside class="panel panel--side">
+    <h2 class="panel__title">Сроки</h2>
+    <dl class="facts">
+      <div class="fact">
+        <dt>Ожидаемое завершение</dt>
+        <dd class="<%= overdue ? 'is-overdue' : soon ? 'is-soon' : '' %>">
+          <% if (task.dueDate) { %>
+            <%= formatDate(task.dueDate) %><br>
+            <small><%= task.status === STATUSES.DONE ? 'срок закрыт' : formatRelativeDays(days) %></small>
+          <% } else { %>не задано<% } %>
+        </dd>
+      </div>
+      <div class="fact"><dt>Создана</dt><dd><%= formatDateTime(task.createdAt) %></dd></div>
+      <div class="fact"><dt>Изменена</dt><dd><%= formatDateTime(task.updatedAt) %></dd></div>
+      <% if (task.completedAt) { %>
+        <div class="fact"><dt>Выполнена</dt><dd><%= formatDateTime(task.completedAt) %></dd></div>
+      <% } %>
+    </dl>
+  </aside>
+
+  <section class="panel panel--wide">
+    <h2 class="panel__title">
+      Вложения
+      <span class="panel__counter"><%= task.attachments.length %></span>
+    </h2>
+
+    <% if (task.attachments.length === 0) { %>
+      <p class="panel__text panel__text--muted">К задаче ещё не прикреплено ни одного файла.</p>
+    <% } else { %>
+      <ul class="files">
+        <% task.attachments.forEach((file) => { %>
+          <li class="file">
+            <span class="file__icon" aria-hidden="true"><%= (file.originalName.split('.').pop() || '?').slice(0, 4).toUpperCase() %></span>
+            <span class="file__body">
+              <a class="file__name" href="/tasks/<%= task.id %>/attachments/<%= file.id %>"><%= file.originalName %></a>
+              <span class="file__meta"><%= formatBytes(file.size) %> · <%= formatDateTime(file.uploadedAt) %></span>
+            </span>
+            <form action="/tasks/<%= task.id %>/attachments/<%= file.id %>/delete" method="post">
+              <button type="submit" class="link link--danger">Открепить</button>
+            </form>
+          </li>
+        <% }) %>
+      </ul>
+    <% } %>
+
+    <form class="upload<%= errors.attachments ? ' upload--invalid' : '' %>"
+          action="/tasks/<%= task.id %>/attachments" method="post" enctype="multipart/form-data">
+      <input type="file" name="attachments" multiple>
+      <button type="submit" class="button button--primary">Прикрепить</button>
+      <% if (errors.attachments) { %><span class="field__error"><%= errors.attachments %></span><% } %>
+    </form>
+  </section>
+</div>
+
+<%- include('../partials/foot') %>

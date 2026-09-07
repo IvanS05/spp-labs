@@ -1,0 +1,20 @@
+{
+  "name": "@spp/lab1",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Лабораторная 1: список задач с серверным рендерингом (Express + EJS)",
+  "type": "module",
+  "main": "src/server.js",
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "node --watch src/server.js",
+    "seed": "node src/seed.js",
+    "test": "node test/smoke.mjs"
+  },
+  "dependencies": {
+    "@spp/core": "1.0.0",
+    "ejs": "^3.1.10",
+    "express": "^5.1.0",
+    "multer": "^2.0.2"
+  }
+}
