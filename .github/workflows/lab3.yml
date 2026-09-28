@@ -1,0 +1,30 @@
+# Автоматическая проверка кода лабораторной 3 (пункт 5 задания).
+# GitHub запускает этот процесс сам при каждом изменении в папке lab3.
+name: lab3
+
+on:
+  push:
+    paths: ['lab3/**', '.github/workflows/lab3.yml']
+  pull_request:
+    paths: ['lab3/**', '.github/workflows/lab3.yml']
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    # Все команды выполняются внутри папки lab3, а не в корне репозитория.
+    defaults:
+      run:
+        working-directory: lab3
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      # npm ci ставит ровно те версии, что записаны в package-lock.json.
+      - run: npm ci
+
+      # Проверка стиля и явных ошибок в коде.
+      - run: npm run lint

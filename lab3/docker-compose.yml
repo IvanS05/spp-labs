@@ -1,0 +1,45 @@
+# Два контейнера: приложение и база данных.
+# Запуск: docker compose up --build   ->   http://localhost:3000
+services:
+  mongo:
+    image: mongo:7
+    restart: unless-stopped
+    volumes:
+      # Том, чтобы данные не пропадали при пересоздании контейнера.
+      - mongo-data:/data/db
+
+  app:
+    build: .
+    restart: unless-stopped
+    ports:
+      - '3000:3000'
+    environment:
+      # mongo — имя сервиса выше; Docker сам превращает его в адрес нужного контейнера.
+      MONGO_URL: mongodb://mongo:27017
+      UPLOADS_DIR: /app/data/uploads
+      # Этим ключом подписываются временные ключи доступа.
+      JWT_SECRET: lab3-secret
+      # Адрес, который подставляется в ссылку из письма о восстановлении пароля.
+      APP_URL: http://localhost:3000
+      # Первый администратор: создаётся при старте, если его ещё нет в базе.
+      ADMIN_EMAIL: admin@lab3.local
+      ADMIN_PASSWORD: admin12345
+      # Почтовый сервер. Пока SMTP_HOST не задан, ссылка восстановления
+      # не уходит письмом, а пишется в лог: docker compose logs app
+      SMTP_HOST: smtp.gmail.com
+      SMTP_PORT: 587
+      # Логин и пароль — секреты, поэтому не здесь, а в файле .env рядом
+      # (он в .gitignore и никогда не попадает в git). Docker Compose
+      # подставляет их сюда сам по имени переменной.
+      SMTP_USER: ${SMTP_USER}
+      SMTP_PASS: ${SMTP_PASS}
+      MAIL_FROM: ${SMTP_USER}
+    volumes:
+      # Загруженные файлы лежат вне образа, поэтому переживают пересборку.
+      - uploads:/app/data/uploads
+    depends_on:
+      - mongo
+
+volumes:
+  mongo-data:
+  uploads:

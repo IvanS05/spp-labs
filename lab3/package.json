@@ -1,0 +1,26 @@
+{
+  "name": "spp-lab3",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Лабораторная 3: роли, временные ключи, защита доступа и логирование",
+  "type": "module",
+  "main": "src/server.js",
+  "scripts": {
+    "start": "node src/server.js",
+    "lint": "eslint ."
+  },
+  "dependencies": {
+    "bcryptjs": "^3.0.2",
+    "express": "^5.1.0",
+    "jsonwebtoken": "^9.0.2",
+    "mongodb": "^6.21.0",
+    "multer": "^2.0.2",
+    "nodemailer": "^10.0.10",
+    "pino": "^10.0.0"
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "eslint": "^10.11.0",
+    "globals": "^16.5.0"
+  }
+}

@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Список задач</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=JetBrains+Mono:wght@400;600&display=swap">
+  <link rel="stylesheet" href="/css/app.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><text y='26' font-size='26'>&#127925;</text></svg>">
+</head>
+<body>
+  <div class="aurora" aria-hidden="true"><span></span><span></span><span></span></div>
+
+  <header class="topbar">
+    <div class="brand">
+      <span class="brand__mark" aria-hidden="true"></span>
+      <span class="brand__text"><strong>Список задач</strong></span>
+    </div>
+
+    <!-- Меню и данные вошедшего видны только после входа -->
+    <nav class="topnav" id="topnav" hidden>
+      <button class="topnav__link is-active" type="button" data-screen="list">Все задачи</button>
+      <button class="topnav__link" type="button" data-screen="form">Новая задача</button>
+      <button class="topnav__link" type="button" data-screen="sessions">Подключения</button>
+      <button class="topnav__link" type="button" data-screen="admin" id="nav-admin" hidden>Пользователи</button>
+    </nav>
+
+    <div class="who" id="who" hidden>
+      <span class="who__email" id="who-email"></span>
+      <span class="badge badge--ghost" id="who-role"></span>
+      <button class="button button--ghost" type="button" id="logout">Выйти</button>
+    </div>
+  </header>
+
+  <main class="page">
+    <!-- Сюда попадают сообщения, не привязанные к конкретному полю -->
+    <p class="notice notice--error" id="notice" hidden></p>
+    <p class="notice notice--ok" id="message" hidden></p>
+
+    <!-- ================================================== экраны до входа -->
+
+    <!-- Вход и регистрация: одна форма, кнопка рядом переключает её смысл -->
+    <section id="view-auth" hidden>
+      <div class="pagehead">
+        <h1 class="pagehead__title" id="auth-title">Вход в систему</h1>
+      </div>
+
+      <form class="panel form form--narrow" id="auth-form" novalidate>
+        <div class="field" data-field="email">
+          <label class="field__label" for="email">Электронная почта</label>
+          <input type="email" id="email" name="email" placeholder="user@example.com">
+          <p class="field__error" data-error="email" hidden></p>
+        </div>
+
+        <div class="field" data-field="password">
+          <label class="field__label" for="password">Пароль</label>
+          <input type="password" id="password" name="password" placeholder="не короче 8 символов">
+          <p class="field__error" data-error="password" hidden></p>
+        </div>
+
+        <div class="form__actions">
+          <button class="button button--primary" type="submit" id="auth-submit">Войти</button>
+          <button class="button button--ghost" type="button" id="auth-switch">Регистрация</button>
+          <button class="link" type="button" data-screen="forgot">Забыли пароль?</button>
+        </div>
+      </form>
+    </section>
+
+    <!-- Запрос письма со ссылкой на смену пароля -->
+    <section id="view-forgot" hidden>
+      <button class="back" type="button" data-screen="auth">← К входу</button>
+      <div class="pagehead">
+        <h1 class="pagehead__title">Восстановление доступа</h1>
+      </div>
+
+      <form class="panel form form--narrow" id="forgot-form" novalidate>
+        <div class="field" data-field="email">
+          <label class="field__label" for="forgot-email">Электронная почта</label>
+          <input type="email" id="forgot-email" name="email" placeholder="user@example.com">
+          <p class="field__error" data-error="email" hidden></p>
+        </div>
+        <p class="hint">На указанный адрес придёт ссылка, действующая 30 минут.</p>
+        <div class="form__actions">
+          <button class="button button--primary" type="submit">Отправить письмо</button>
+        </div>
+      </form>
+    </section>
+
+    <!-- Смена пароля по ссылке из письма: страница открывается адресом /?reset=ключ -->
+    <section id="view-reset" hidden>
+      <div class="pagehead">
+        <h1 class="pagehead__title">Новый пароль</h1>
+      </div>
+
+      <form class="panel form form--narrow" id="reset-form" novalidate>
+        <div class="field" data-field="password">
+          <label class="field__label" for="reset-password">Пароль</label>
+          <input type="password" id="reset-password" name="password" placeholder="не короче 8 символов">
+          <p class="field__error" data-error="password" hidden></p>
+        </div>
+        <p class="hint">После смены пароля все открытые подключения закроются.</p>
+        <div class="form__actions">
+          <button class="button button--primary" type="submit">Сохранить пароль</button>
+        </div>
+      </form>
+    </section>
+
+    <!-- ================================================ экраны после входа -->
+
+    <!-- Экран 1: список задач -->
+    <section id="view-list" hidden>
+      <div class="toolbar__row">
+        <p class="list__summary" id="summary"></p>
+        <button class="button button--primary" type="button" data-screen="form">Добавить задачу</button>
+      </div>
+      <div class="list" id="list"></div>
+    </section>
+
+    <!-- Экран 2: форма создания и редактирования -->
+    <section id="view-form" hidden>
+      <button class="back" type="button" data-screen="list">← К списку</button>
+      <div class="pagehead">
+        <h1 class="pagehead__title" id="form-title">Новая задача</h1>
+      </div>
+
+      <form class="panel form" id="form" novalidate>
+        <div class="field" data-field="title">
+          <label class="field__label" for="title">
+            Название <span class="field__req">обязательно</span>
+          </label>
+          <input type="text" id="title" name="title" placeholder="Например: подготовить отчёт">
+          <p class="field__error" data-error="title" hidden></p>
+        </div>
+
+        <div class="field" data-field="description">
+          <label class="field__label" for="description">Описание</label>
+          <textarea id="description" name="description" placeholder="Что нужно сделать"></textarea>
+          <p class="field__error" data-error="description" hidden></p>
+        </div>
+
+        <div class="form__row">
+          <div class="field" data-field="status">
+            <label class="field__label" for="status">Статус</label>
+            <select id="status" name="status">
+              <option value="todo">К выполнению</option>
+              <option value="in_progress">В работе</option>
+              <option value="done">Выполнено</option>
+            </select>
+            <p class="field__error" data-error="status" hidden></p>
+          </div>
+
+          <div class="field" data-field="priority">
+            <label class="field__label" for="priority">Приоритет</label>
+            <select id="priority" name="priority">
+              <option value="low">Низкий</option>
+              <option value="normal" selected>Обычный</option>
+              <option value="high">Высокий</option>
+            </select>
+            <p class="field__error" data-error="priority" hidden></p>
+          </div>
+
+          <div class="field" data-field="dueDate">
+            <label class="field__label" for="dueDate">Срок</label>
+            <input type="date" id="dueDate" name="dueDate">
+            <p class="field__error" data-error="dueDate" hidden></p>
+          </div>
+        </div>
+
+        <div class="form__actions">
+          <button class="button button--primary" type="submit">Сохранить</button>
+          <button class="button button--ghost" type="button" data-screen="list">Отмена</button>
+        </div>
+      </form>
+
+      <!-- Файлы прикрепляются отдельным запросом, поэтому блок виден только у сохранённой задачи -->
+      <section class="panel" id="attachments" hidden>
+        <h2 class="panel__title">Вложения <span class="panel__counter" id="files-count">0</span></h2>
+        <ul class="files" id="files"></ul>
+        <form class="upload" id="upload-form">
+          <input type="file" id="file-input" name="attachments" multiple>
+          <button class="button button--ghost" type="submit">Загрузить</button>
+        </form>
+        <p class="field__error" data-error="attachments" hidden></p>
+      </section>
+    </section>
+
+    <!-- Экран 3: свои активные подключения -->
+    <section id="view-sessions" hidden>
+      <div class="pagehead">
+        <h1 class="pagehead__title">Активные подключения</h1>
+      </div>
+      <p class="hint">Одновременно разрешено не больше трёх подключений: при новом входе самое старое закрывается.</p>
+      <div class="list" id="sessions"></div>
+    </section>
+
+    <!-- Экран 4: пользователи и все подключения — только для администратора -->
+    <section id="view-admin" hidden>
+      <div class="pagehead">
+        <h1 class="pagehead__title">Пользователи</h1>
+      </div>
+      <div class="list" id="users"></div>
+
+      <div class="pagehead">
+        <h2 class="pagehead__title">Подключения всех пользователей</h2>
+      </div>
+      <div class="list" id="all-sessions"></div>
+    </section>
+  </main>
+
+  <script src="/js/app.js"></script>
+</body>
+</html>
